@@ -32,7 +32,7 @@ GIF created with [Kap](https://getkap.co/).
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+One of the major difficulties this project presented was the adaptation to the Apple ecosystem, for it is my first project done entirely on an Apple product. Furtheremore, I don't have a lot of experiencie with GitHub, however now I understand how useful it is and I really enjoyed it.
 
 ## License
 
