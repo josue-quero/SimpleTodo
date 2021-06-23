@@ -1,9 +1,11 @@
 package com.example.simpletodo;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,7 +21,14 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 public class MainActivity extends AppCompatActivity {
+
+    public static final String KEY_ITEM_TEXT = "item_text";
+    public static final String KEY_ITEM_POSITION = "item_position";
+    public static final int EMPTY_RESULT = -2;
+    public static final int EDIT_TEXT_CODE = 20;
 
     List<String> items;
 
@@ -51,7 +60,21 @@ public class MainActivity extends AppCompatActivity {
                 saveItems();
             }
         };
-        itemsAdapter = new ItemsAdapter(items, onLongClickListener);
+
+        ItemsAdapter.OnClickListener onClickListener = new ItemsAdapter.OnClickListener() {
+            @Override
+            public void onItemClicked(int position) {
+                Log.d("MainActivity", "Single click at position " + position);
+                // Create the new Activity
+                Intent i = new Intent(MainActivity.this, EditActivity.class);
+                // Pass the relevant data being edited
+                i.putExtra(KEY_ITEM_TEXT, items.get(position));
+                i.putExtra(KEY_ITEM_POSITION, position);
+                // Display the Activity
+                startActivityForResult(i, EDIT_TEXT_CODE);
+            }
+        };
+        itemsAdapter = new ItemsAdapter(items, onLongClickListener, onClickListener);
         rvItems.setAdapter(itemsAdapter);
         rvItems.setLayoutManager(new LinearLayoutManager(this));
 
@@ -69,6 +92,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    // Handle the result of the Edit Activity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == EDIT_TEXT_CODE){
+            // Retrieve the updated text value
+            String itemText = data.getStringExtra(KEY_ITEM_TEXT);
+            // Extract the original position of the edited item from position key
+            int position = data.getExtras().getInt(KEY_ITEM_POSITION);
+
+            // Update the model at the right position with the new item text
+            items.set(position, itemText);
+            // Notify the adapter
+            itemsAdapter.notifyItemChanged(position);
+            // Persist the changes
+            saveItems();
+            Toast.makeText(getApplicationContext(), "Item updated successfully", Toast.LENGTH_SHORT).show();
+        // Check to see if the edited text is empty
+        } else if(resultCode == EMPTY_RESULT) {
+            // Extract the original position of the edited item from position key
+            int position = data.getExtras().getInt(KEY_ITEM_POSITION);
+            // Remove the item
+            items.remove(position);
+            // Notify the adapter
+            itemsAdapter.notifyItemRemoved(position);
+
+            Toast.makeText(getApplicationContext(), "Item was removed", Toast.LENGTH_SHORT).show();
+            saveItems();
+        } else {
+                Log.w("MainActivity", "Unknown call to onActivityResult");
+        }
+    }
+
     private File getDataFile() {
         return new File(getFilesDir(), "data.txt");
     }
