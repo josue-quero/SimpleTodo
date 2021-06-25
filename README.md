@@ -36,7 +36,7 @@ One of the major difficulties this project presented was the adaptation to the A
 
 ## License
 
-    Copyright [yyyy] [name of copyright owner]
+    Copyright [2021] [David Marcial]
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
